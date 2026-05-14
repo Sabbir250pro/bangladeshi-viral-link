@@ -674,17 +674,47 @@ function setupAdSDK() {
         }
     };
 
+    // নতুন সিস্টেম: বর্তমানে কোন পেজে আছেন তা মনে রাখার জন্য
+    let currentTab = 'home';
+
     window.switchTab = (tab) => {
+        currentTab = tab; // এখানে আমরা সেভ করে রাখছি আপনি কোন পেজে ঢুকলেন
+        
         document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
         const target = document.getElementById(tab + '-page');
         if(target) target.classList.remove('hidden');
         
+        // নিচের বাটনগুলোর রঙ ঠিক করার জন্য
         document.getElementById('nav-home').className = tab === 'home' ? "flex flex-col items-center gap-1 amber-text" : "flex flex-col items-center gap-1 text-gray-500";
         document.getElementById('nav-profile').className = (tab === 'profile' || tab === 'earn') ? "flex flex-col items-center gap-1 amber-text" : "flex flex-col items-center gap-1 text-gray-500";
+        
+        // টেলিগ্রামের উপরের ব্যাক বাটন (Back Button) কন্ট্রোল
+        if (window.Telegram?.WebApp) {
+            if (tab === 'home') {
+                window.Telegram.WebApp.BackButton.hide(); // হোমে থাকলে ব্যাক বাটন দেখাবে না
+            } else {
+                window.Telegram.WebApp.BackButton.show(); // অন্য পেজে থাকলে ব্যাক বাটন দেখাবে
+            }
+        }
         window.scrollTo(0,0);
     };
 
-    window.goBack = () => switchTab('home');
+    // ব্যাক বাটনে ক্লিক করলে কি হবে তার বুদ্ধিমান লজিক
+    window.goBack = () => {
+        if (currentTab === 'earn') {
+            switchTab('profile'); // Earn পেজ থেকে ব্যাক দিলে Profile-এ ফেরত যাবে
+        } else {
+            switchTab('home'); // অন্য সব পেজ থেকে ব্যাক দিলে Home-এ যাবে
+        }
+    };
+
+    // টেলিগ্রামের একদম উপরের বাম পাশের ব্যাক বাটন কাজ করানোর জন্য
+    if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.BackButton.onClick(() => {
+            window.goBack();
+        });
+    }
+
     window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('u-reflink').textContent); showToast("Copied!"); };
     window.shareRef = () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(document.getElementById('u-reflink').textContent)}&text=Watch and Earn!`); };
     
