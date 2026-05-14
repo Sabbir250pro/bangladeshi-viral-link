@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Bangla - Pro Player</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; padding-bottom: 110px; overflow-x: hidden; }
+        .amber-text { color: #FF9F00; }
+        .amber-bg { background-color: #FF9F00; }
+        .card-bg { background-color: #0F0F0F; border: 1px solid #1A1A1A; }
+        .bottom-nav { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1A1A1A; }
+        
+        .category-pill { white-space: nowrap; background: #1A1A1A; color: #fff; border: 1px solid #222; }
+        .category-pill.active { background: #FF9F00; color: #000; border-color: #FF9F00; }
+        
+        /* Progress Bar */
+        .p-bar { height: 6px; background: #1A1A1A; border-radius: 10px; overflow: hidden; }
+        .p-fill { height: 100%; background: #FF9F00; transition: width 0.5s; }
+
+        /* Instruction Box Custom Borders (Cyberpunk Style) */
+        .instr-box { position: relative; background: #0D0900; border: 1px solid #FF9F0044; border-radius: 20px; padding: 25px; margin-top: 20px; }
+        .corner { position: absolute; width: 14px; height: 14px; border-color: #FF9F00; border-style: solid; }
+        .t-l { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+        .t-r { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+        .b-l { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+        .b-r { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .duration-tag { position: absolute; bottom: 12px; right: 12px; background: rgba(0,0,0,0.8); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HOME PAGE -->
+<div id="home-page" class="section">
+    <header class="p-4 sticky top-0 bg-black z-50">        
+        
+        <!-- Admin Live Online Section -->
+<div id="admin-panel" class="hidden mt-8 px-2">
+    <div class="flex items-center justify-between mb-4 px-2">
+        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Live Online Users</h3>
+        <span class="bg-green-500/20 text-green-500 text-[9px] px-2 py-1 rounded-full font-bold animate-pulse">LIVE UPDATE</span>
+    </div>
+    <div class="card-bg p-4 rounded-[2rem] border border-white/5">
+        <div id="online-users-list" class="space-y-4">
+            <!-- এখানে লাইভ ডাটা লোড হবে -->
+            <p class="text-[10px] text-center text-gray-600">ইউজার ট্র্যাক করা হচ্ছে...</p>
+        </div>
+    </div>
+</div>
+        
+        <!-- এখানে ক্যাটাগরি অটোমেটিক তৈরি হবে -->
+        <div id="cat-list" class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+            <div onclick="filterCat('All')" id="cat-all" class="category-pill active px-5 py-2 rounded-full text-xs font-bold">All Videos</div>
+        </div>
+        
+        <h2 id="page-title" class="text-2xl font-black mt-4 tracking-tight">Latest Videos</h2>
+        
+        <div class="bg-[#1a1400] text-amber-500 text-[10px] py-2 px-4 rounded-full mt-3 flex items-center gap-2 border border-amber-900/30">
+            <i class="fas fa-bullhorn animate-pulse"></i>
+            <marquee id="dynamic-marquee" scrollamount="3">নোটিশ লোড হচ্ছে...</marquee>
+        </div>
+    </header>
+    <main class="px-4 space-y-6 mt-2" id="video-grid"></main>
+</div>
+
+    <!-- 2. DETAIL PAGE -->
+    <div id="detail-page" class="section hidden">
+        <nav class="p-4 flex items-center bg-black sticky top-0 z-50">
+            <button onclick="goBack()" class="text-xl"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="ml-4 font-bold text-sm uppercase">Video Player</h2>
+        </nav>
+        <div id="detail-content" class="px-4 pb-10"></div>
+    </div>
+
+    <!-- 3. EARN PAGE -->
+    <div id="earn-page" class="section hidden">
+        <nav class="p-4 flex items-center border-b border-gray-900 bg-black sticky top-0 z-50">
+            <button onclick="goBack()" class="text-xl"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="ml-4 font-bold text-sm uppercase amber-text">More Point Earning</h2>
+        </nav>
+        
+        <div class="px-4 pt-6">
+            <div class="card-bg p-8 rounded-[2.5rem] text-center mb-6">
+                <div class="amber-bg w-14 h-14 rounded-full mx-auto flex items-center justify-center text-black text-2xl mb-4 shadow-lg shadow-amber-500/20">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h2 class="text-xl font-black mb-1">Watch Ads & Earn</h2>
+                <p class="text-gray-500 text-[10px]">regular ad অথবা custom earning button start করে point earn করা যাবে।</p>
+            </div>
+
+            <!-- Stats Grid - Exactly as in your original -->
+            <div class="grid grid-cols-2 gap-3 mb-6 text-center">
+                <div class="card-bg p-5 rounded-3xl"><p class="text-2xl font-black amber-text pts-val">0</p><p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Current Points</p></div>
+                <div class="card-bg p-5 rounded-3xl"><p class="text-2xl font-black amber-text ppa-val">0</p><p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Point Per Ad</p></div>
+                <div class="card-bg p-5 rounded-3xl"><p class="text-2xl font-black amber-text ads-today-val">0</p><p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Ads Today</p></div>
+                <div class="card-bg p-5 rounded-3xl"><p class="text-2xl font-black amber-text limit-val">0</p><p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Daily Limit</p></div>
+            </div>
+
+            <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 ml-2">Earning Settings</h3>
+            <div class="card-bg p-5 rounded-3xl mb-6">
+                <div class="space-y-4 text-[11px] mb-6">
+                    <div class="flex justify-between"><span>Reward Per Ad</span><span class="font-bold ppa-text">0 Points</span></div>
+                    <div class="flex justify-between"><span>Maximum Daily Earning Ads</span><span class="font-bold limit-text">0</span></div>
+                    <div class="flex justify-between"><span>Remaining Today</span><span class="font-bold amber-text remain-val">0</span></div>
+                </div>
+                <div class="p-bar mb-2"><div id="earn-prog" class="p-fill" style="width: 0%"></div></div>
+                <p class="text-center text-[10px] text-gray-500" id="earn-prog-text">0 / 0 completed today</p>
+            </div>
+
+            <button onclick="watchAdForPoints()" class="w-full amber-bg text-black py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+                <i class="fas fa-play-circle text-lg"></i> Watch Ad Now
+            </button>
+        </div>
+    </div>
+
+    <!-- 4. PROFILE PAGE -->
+    <div id="profile-page" class="section hidden px-4 pt-6">
+        <div class="card-bg p-5 rounded-[2rem] flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 rounded-full amber-bg flex items-center justify-center text-black text-2xl font-bold border-4 border-black overflow-hidden">
+                <img id="u-photo" src="" class="hidden w-full h-full object-cover">
+                <i id="u-icon" class="fas fa-user"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-black" id="u-fname">Telegram User</h2>
+                <p class="text-gray-500 text-[10px]" id="u-uname">@username</p>
+                <div class="mt-1 text-[8px] amber-text bg-[#1a1400] px-3 py-1 rounded-full border border-amber-900/40 font-bold uppercase inline-block">
+                    <i class="fas fa-shield-halved mr-1"></i> Account Profile
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 ml-2">Overview</h3>
+        <div class="grid grid-cols-2 gap-3 mb-8 text-center">
+            <div class="card-bg p-6 rounded-3xl">
+                <div class="text-amber-500 mb-2"><i class="fas fa-coins text-xl"></i></div>
+                <p class="text-2xl font-black amber-text pts-val">0</p>
+                <p class="text-gray-500 text-[10px] font-bold uppercase">My Points</p>
+            </div>
+            <div class="card-bg p-6 rounded-3xl">
+                <div class="text-amber-500 mb-2"><i class="fas fa-users text-xl"></i></div>
+                <p class="text-2xl font-black amber-text ref-val">0</p>
+                <p class="text-gray-500 text-[10px] font-bold uppercase">Total Referrals</p>
+            </div>
+        </div>
+
+        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 ml-2">Referral System</h3>
+        <div class="card-bg p-6 rounded-3xl mb-8">
+            <div class="space-y-4 text-[11px] mb-8">
+                <div class="flex justify-between border-b border-gray-900 pb-2"><span>Per Referral Reward</span><span class="font-bold ref-reward-text">0 Points</span></div>
+                <div class="flex justify-between border-b border-gray-900 pb-2"><span>Join Bonus</span><span class="font-bold join-bonus-text">0 Points</span></div>
+                <div class="flex justify-between"><span>Referral Code</span><span class="font-bold amber-text" id="u-id">N/A</span></div>
+            </div>
+            <p class="text-[11px] font-bold mb-3">Your Referral Link</p>
+            <div class="bg-black p-4 rounded-xl border border-gray-900 text-[10px] text-gray-500 mb-6 break-all" id="u-reflink">Loading...</div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="copyRef()" class="amber-bg text-black py-4 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2"><i class="fas fa-copy"></i> Copy Link</button>
+                <button onclick="shareRef()" class="card-bg py-4 rounded-2xl font-black text-[10px] uppercase border border-gray-800 flex items-center justify-center gap-2"><i class="fas fa-share-alt"></i> Share</button>
+            </div>
+        </div>
+
+        <!-- How It Works & More Points (From your original) -->
+        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 ml-2">How It Works</h3>
+        <div class="card-bg p-6 rounded-3xl mb-8">
+            <div class="space-y-4 text-[11px] mb-6">
+                <div class="flex justify-between"><span>When friend joins with your code</span><span class="font-bold">Reward added</span></div>
+                <div class="flex justify-between"><span>More Earning</span><span class="font-bold">Watch ads & earn</span></div>
+            </div>
+            <button onclick="openTutorial()" class="w-full amber-bg text-black py-4 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2">
+    <i class="fas fa-play-circle"></i> Watch Tutorial
+</button>
+        </div>
+
+        <h3 class="text-[10px] font-black text-gray-600 uppercase mb-4 ml-2">More Point Earning</h3>
+        <div class="card-bg p-5 rounded-3xl mb-6" onclick="switchTab('earn')">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#1a1400] flex items-center justify-center text-amber-500 text-xl shadow-lg shadow-amber-500/10"><i class="fas fa-bolt"></i></div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm">Watch Ads & Earn Points</h4>
+                    <p class="text-[10px] text-gray-500 mt-1 leading-relaxed">এখানে থেকে extra point earn করা যাবে। ad complete করলে point add হবে।</p>
+                </div>
+            </div>
+            <button class="w-full amber-bg text-black py-3.5 rounded-2xl font-black text-[10px] mt-5 uppercase tracking-widest flex items-center justify-center gap-2"><i class="fas fa-bolt"></i> More Point Earning</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="fixed bottom-0 left-0 right-0 bottom-nav px-8 py-4 flex justify-around items-center z-[60]">
+        <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 amber-text">
+            <i class="fas fa-home text-2xl"></i><span class="text-[10px] font-bold">Home</span>
+        </button>
+        <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-gray-500">
+            <i class="fas fa-user text-2xl"></i><span class="text-[10px] font-bold">Profile</span>
+        </button>
+    </nav>
+
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-amber-500 text-black px-6 py-3 rounded-2xl text-[10px] font-black opacity-0 transition-all z-[100] shadow-2xl"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, query, orderBy, enableIndexedDbPersistence, serverTimestamp, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    const firebaseConfig = {
+  apiKey: "AIzaSyAGSmJuweKLpu470YtENlUeZTy_lBhFhgQ",
+  authDomain: "video-bot-ed180.firebaseapp.com",
+  databaseURL: "https://video-bot-ed180-default-rtdb.firebaseio.com",
+  projectId: "video-bot-ed180",
+  storageBucket: "video-bot-ed180.firebasestorage.app",
+  messagingSenderId: "111802871552",
+  appId: "1:111802871552:web:3c864f41a45eba49c00de5"
+};
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    enableIndexedDbPersistence(db).catch((err) => console.error("Persistence failed", err));
+
+    const tg = window.Telegram?.WebApp;
+    if (tg && tg.expand) tg.expand();
+
+    let userData = { points: 0, adsToday: 0, totalRefs: 0, unlocked: {} };
+    let adminConfig = { pointPerAd: 0, dailyLimit: 0, referralReward: 0, joinBonus: 0, botUsername: 'bot', unlockDuration: 1440 };
+    let allVideos = JSON.parse(localStorage.getItem('cached_vids') || '[]');
+    let activeVideo = null;
+    let countdownInterval = null;
+
+    async function init() {
+    // টেলিগ্রাম ইউজার এবং রেফারেল প্যারামিটার ধরা
+    let user = tg?.initDataUnsafe?.user || { id: "1000001", first_name: "Web User", username: "guest" };
+    const refBy = tg?.initDataUnsafe?.start_param; 
+
+    if(allVideos.length > 0) {
+        renderGrid(allVideos);
+        createCategoryPills(allVideos);
+    }
+
+    const userRef = doc(db, "users", user.id.toString());
+    const adminRef = doc(db, "settings", "admin");
+    
+    try {
+        // ১. অ্যাডমিন সেটিংস লিসেনার
+        onSnapshot(adminRef, (snap) => {
+            if(snap.exists()) {
+                adminConfig = snap.data();
+                setupAdSDK();
+                updateUI();
+            }
+        });
+
+        // ২. ইউজার ডাটা চেক করা
+        const uSnap = await getDoc(userRef);
+
+        if(!uSnap.exists()){
+            const adminData = (await getDoc(adminRef)).data() || {};
+            const welcomePoints = Number(adminData.joinBonus) || 0;
+            
+            userData = { 
+                id: user.id, 
+                first_name: user.first_name || "Unknown", // নাম সেভ হবে
+                username: user.username || "guest",       // ইউজারনেম সেভ হবে
+                points: welcomePoints, 
+                adsToday: 0, 
+                totalRefs: 0, 
+                lastDate: new Date().toDateString(), 
+                unlocked: {},
+                referredBy: refBy || null,
+                lastSeen: serverTimestamp() // প্রথম টাইমস্ট্যাম্প
+            };
+            
+            await setDoc(userRef, userData);
+
+            // ৩. রেফারেল লজিক
+            if(refBy && refBy !== user.id.toString()) {
+                const referrerRef = doc(db, "users", refBy.toString());
+                const referrerSnap = await getDoc(referrerRef);
+                if(referrerSnap.exists()) {
+                    await updateDoc(referrerRef, {
+                        points: increment(Number(adminData.referralReward) || 0),
+                        totalRefs: increment(1)
+                    });
+                }
+            }
+        } else {
+            userData = uSnap.data();
+            userData.id = user.id; 
+            
+            if(userData.lastDate !== new Date().toDateString()) {
+                await updateDoc(userRef, { adsToday: 0, lastDate: new Date().toDateString() });
+            }
+        }
+
+        // ৪. ইউজারের রিয়েলটাইম আপডেট লিসেনার
+        onSnapshot(userRef, (s) => { 
+            if(s.exists()){ 
+                userData = s.data(); 
+                userData.id = user.id; 
+                updateUI(); 
+                const isDetailPageVisible = !document.getElementById('detail-page').classList.contains('hidden');
+                if(activeVideo && isDetailPageVisible) renderDetail(); 
+            } 
+        });
+
+        setupProfile(user);
+        loadHome();
+
+        // ৫. অনলাইন সিস্টেম চালু করা
+        startOnlineSystem();
+
+    } catch (error) { console.error("Init error:", error); loadHome(); }
+}
+
+// উপস্থিতির আপডেট ফাংশন (Server-এ lastSeen পাঠাবে)
+async function updatePresence() {
+    if (!userData || !userData.id) return;
+    const userRef = doc(db, "users", userData.id.toString());
+    try {
+        await updateDoc(userRef, {
+            lastSeen: serverTimestamp()
+        });
+    } catch (e) {
+        console.error("Presence update failed", e);
+    }
+}
+
+// অনলাইন ইউজার গণনার ফাংশন (Admin দেখার জন্য Count)
+async function getOnlineUsersCount() {
+    try {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); 
+        const q = query(collection(db, "users"), where("lastSeen", ">", fiveMinutesAgo));
+        const snapshot = await getCountFromServer(q);
+        const count = snapshot.data().count;
+        
+        // HTML এ id="online-count" যেখানে আছে সেখানে সংখ্যাটি দেখাবে
+        const el = document.getElementById('online-count');
+        if(el) el.textContent = count;
+    } catch (e) {
+        console.error("Error counting online users", e);
+    }
+}
+
+// অনলাইন সিস্টেম কন্ট্রোলার
+function startOnlineSystem() {
+    // সাথে সাথে একবার কল হবে
+    updatePresence(); 
+    getOnlineUsersCount(); 
+    
+    // প্রতি ২ মিনিটে ডাটাবেসে জানাবে যে ইউজার অনলাইন আছে
+    setInterval(updatePresence, 120000); 
+    
+    // প্রতি ১ মিনিটে চেক করবে মোট কতজন অনলাইন (এটি আপনি এডমিন প্যানেলে দেখাতে পারেন)
+    setInterval(getOnlineUsersCount, 60000); 
+}
+
+function setupAdSDK() {
+    if(adminConfig.adZoneId && !document.getElementById('ad-sdk')) {
+        const s = document.createElement('script');
+        s.id = 'ad-sdk';
+        s.src = '//libtl.com/sdk.js';
+        s.dataset.zone = adminConfig.adZoneId;
+        s.dataset.sdk = `show_${adminConfig.adZoneId}`;
+        document.head.appendChild(s);
+    }
+}
+
+    // --- UI রেন্ডারিং ---
+    window.renderDetail = () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        const v = activeVideo;
+        const rawData = userData.unlocked?.[v.id];
+        
+        let count = 0;
+        let expiry = 0;
+        
+        if (typeof rawData === 'object' && rawData !== null) {
+            count = rawData.count || 0;
+            expiry = rawData.expiry || 0;
+        } else if (typeof rawData === 'number') {
+            count = rawData; 
+        }
+
+        if (expiry > 0 && Date.now() > expiry) { count = 0; expiry = 0; }
+
+        const req = v.requiredAds || 3;
+        const isFull = count >= req;
+        const remaining = Math.max(0, req - count);
+
+        let html = `
+            <div class="relative mb-4">
+                <img src="${v.thumbnailUrl}" class="w-full rounded-[2rem] shadow-2xl object-cover aspect-video">
+                <div class="duration-tag">Video</div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                <div onclick="handleLike('${v.id}')" class="stat-box text-center card-bg py-3 rounded-xl active:scale-95 transition-transform"><i class="fas fa-heart text-amber-500 mb-1"></i><p class="text-[10px]">${v.likes || 0} Likes</p></div>
+                <div class="stat-box text-center card-bg py-3 rounded-xl"><i class="fas fa-chart-simple text-blue-500 mb-1"></i><p class="text-[10px]">${v.viewCount || 0} Views</p></div>
+                <div class="stat-box text-center card-bg py-3 rounded-xl" onclick="shareRef()"><i class="fas fa-share-nodes text-orange-500 mb-1"></i><p class="text-[10px]">Share</p></div>
+            </div>
+            <div class="space-y-4">
+                <p class="text-center text-amber-500 text-[10px] font-bold uppercase tracking-widest">
+                    ${isFull ? 'Content unlocked successfully' : 'Unlock this content using ads or points.'}
+                </p>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="stat-box text-center card-bg p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 uppercase">NEED<br>প্রয়োজন</p><p class="text-lg font-black amber-text">${req}</p></div>
+                    <div class="stat-box text-center card-bg p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 uppercase">BALANCE<br>ব্যালেন্স</p><p class="text-lg font-black amber-text">${userData.points}</p></div>
+                    <div class="stat-box text-center card-bg p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 uppercase">REMAINING<br>বাকি</p><p class="text-lg font-black amber-text">${remaining}</p></div>
+                </div>
+                <div class="p-bar"><div class="p-fill" style="width: ${(count/req)*100}%"></div></div>
+                <p class="text-center text-[10px] font-bold text-gray-400">Progress: ${count}/${req}</p>
+        `;
+
+        if (isFull) {
+            html += `
+                <div class="timer-card p-4 flex items-center gap-3 bg-green-500/5 border border-green-500/20 rounded-2xl">
+                    <i class="fas fa-clock text-green-500 text-xl"></i>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400">Unlock expires in</p>
+                        <p id="countdown-timer" class="text-lg font-black text-white leading-none my-1">--:--:--</p>
+                    </div>
+                </div>
+                <button onclick="handleDownload('${v.downloadUrl}')" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
+                    <i class="fas fa-cloud-arrow-down"></i> DOWNLOAD NOW
+                </button>
+            `;
+            startTimer(expiry);
+        } else {
+            html += `
+                <button onclick="unlock('ad')" class="w-full amber-bg text-black py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-lock"></i> Unlock Video
+                </button>
+                <button onclick="unlock('points')" class="w-full card-bg py-4 rounded-2xl font-black text-sm border border-gray-800">
+                    <i class="fas fa-coins amber-text"></i> Use My Points
+                </button>
+            `;
+        }
+
+        html += `
+                <h3 class="text-md font-bold mt-6">${v.title}</h3>
+                <div class="instr-box p-4 card-bg border border-amber-500/20 rounded-2xl mt-4">
+                    <p class="text-center text-xs text-amber-200/80 Bengali leading-relaxed">এই কন্টেন্টটি আনলক করতে বিজ্ঞাপন দেখুন অথবা পয়েন্ট ব্যবহার করুন। তারপর ডাউনলোড বাটন চালু হবে।</p>
+                </div>
+                <button onclick="goBack()" class="w-full card-bg py-4 rounded-2xl font-black text-sm mt-4 border border-white/5">More Video Watching</button>
+            </div>
+        `;
+        document.getElementById('detail-content').innerHTML = html;
+    }
+
+    // --- লাইক এবং ভিউ হ্যান্ডলিং ---
+    window.handleLike = async (id) => {
+        try {
+            const videoRef = doc(db, "files", id);
+            await updateDoc(videoRef, { likes: increment(1) });
+            if(activeVideo) activeVideo.likes = (activeVideo.likes || 0) + 1;
+            renderDetail();
+            showToast("Liked!");
+        } catch (e) { console.error("Like error", e); }
+    };
+
+    window.openDetail = async (id) => { 
+        activeVideo = allVideos.find(v => v.id === id); 
+        if(activeVideo) { 
+            switchTab('detail'); 
+            renderDetail(); 
+            // ভিউ আপডেট
+            try {
+                const videoRef = doc(db, "files", id);
+                await updateDoc(videoRef, { viewCount: increment(1) });
+                activeVideo.viewCount = (activeVideo.viewCount || 0) + 1;
+                renderDetail();
+            } catch (e) { console.error("View update error", e); }
+        } 
+    };
+
+    window.openTutorial = () => {
+    // এডমিন কনফিগ থেকে টিউটোরিয়াল লিংকটি নিবে
+    const link = adminConfig.tutorialLink; 
+    
+    if (link && link.trim() !== "") {
+        if (tg && tg.openLink) {
+            tg.openLink(link); // টেলিগ্রাম অ্যাপের ভেতরে ওপেন হবে
+        } else {
+            window.open(link, '_blank'); // ব্রাউজারে ওপেন হবে
+        }
+    } else {
+        showToast("Tutorial link not set by admin!");
+    }
+};
+    
+    // --- কোর লজিক ---
+    window.unlock = async (type) => {
+        const v = activeVideo;
+        const rawData = userData.unlocked?.[v.id];
+        let count = (typeof rawData === 'object') ? (rawData?.count || 0) : (typeof rawData === 'number' ? rawData : 0);
+        let expiry = (typeof rawData === 'object') ? (rawData?.expiry || 0) : 0;
+
+        if (expiry > 0 && Date.now() > expiry) count = 0;
+
+        const req = v.requiredAds || 3;
+
+        const performUpdate = async (newCount) => {
+            let newExpiry = 0;
+            if (newCount >= req) {
+                newCount = req;
+                const duration = adminConfig.unlockDuration || 1440;
+                newExpiry = Date.now() + (duration * 60 * 1000);
+            }
+            const updatedUnlocks = { ...userData.unlocked, [v.id]: { count: newCount, expiry: newExpiry } };
+            
+            try {
+                const userRef = doc(db, "users", userData.id.toString());
+                if (type === 'points') {
+                    if (userData.points < req) return showToast("Not enough points!");
+                    await updateDoc(userRef, { points: increment(-req), unlocked: updatedUnlocks });
+                } else {
+                    await updateDoc(userRef, { unlocked: updatedUnlocks });
+                }
+                showToast(newCount >= req ? "Unlocked Successfully!" : "Progress Saved!");
+            } catch (e) { showToast("Error saving data!"); }
+        };
+
+        if (type === 'ad') {
+            const adFunc = `show_${adminConfig.adZoneId}`;
+            if (typeof window[adFunc] === 'function') {
+                await window[adFunc]();
+                await performUpdate(count + 1);
+            } else { showToast("Ad not ready. Please try again."); }
+        } else if (type === 'points') {
+            await performUpdate(req);
+        }
+    };
+
+    window.handleDownload = (url) => {
+        if (tg && tg.openLink) { tg.openLink(url); } 
+        else { window.open(url, '_blank'); }
+    };
+
+    function startTimer(expiryTime) {
+        if (!expiryTime) return;
+        function update() {
+            const diff = expiryTime - Date.now();
+            if (diff <= 0) { clearInterval(countdownInterval); renderDetail(); return; }
+            const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+            const el = document.getElementById('countdown-timer');
+            if (el) el.textContent = `${h}:${m}:${s}`;
+        }
+        update();
+        countdownInterval = setInterval(update, 1000);
+    }
+
+    window.watchAdForPoints = async () => {
+        if(userData.adsToday >= adminConfig.dailyLimit) return showToast("Limit Reached!");
+        const adFunc = `show_${adminConfig.adZoneId}`;
+        if(typeof window[adFunc] === 'function'){
+            await window[adFunc]();
+            await updateDoc(doc(db, "users", userData.id.toString()), { points: increment(adminConfig.pointPerAd || 0), adsToday: increment(1) });
+            showToast("Points Added!");
+        } else { showToast("Ad not ready."); }
+    };
+
+    async function loadHome() {
+        try {
+            const q = query(collection(db, "files"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            const freshVids = [];
+            snap.forEach(d => freshVids.push({id: d.id, ...d.data()}));
+            allVideos = freshVids;
+            localStorage.setItem('cached_vids', JSON.stringify(allVideos));
+            renderGrid(allVideos);
+            createCategoryPills(allVideos);
+        } catch(e) { console.error("Load Home Error:", e); }
+    }
+
+    function setupProfile(u) {
+        document.getElementById('u-fname').textContent = u.first_name || 'User';
+        document.getElementById('u-uname').textContent = u.username ? `@${u.username}` : u.id;
+        document.getElementById('u-id').textContent = u.id;
+        document.getElementById('u-reflink').textContent = `https://t.me/${adminConfig.botUsername || 'bot'}?start=${u.id}`;
+        if(u.photo_url){ 
+            const img = document.getElementById('u-photo');
+            img.src = u.photo_url; 
+            img.classList.remove('hidden'); 
+            document.getElementById('u-icon').classList.add('hidden'); 
+        }
+    }
+
+    function updateUI() {
+    // ১. ইউজারের ব্যক্তিগত ডাটা আপডেট (পয়েন্ট, মোট রেফার সংখ্যা)
+    document.querySelectorAll('.pts-val').forEach(el => el.textContent = userData.points || 0);
+    document.querySelectorAll('.ref-val').forEach(el => el.textContent = userData.totalRefs || 0);
+    document.querySelectorAll('.ads-today-val').forEach(el => el.textContent = userData.adsToday || 0);
+
+    // ২. অ্যাডমিন কনফিগ থেকে জেনারেল সেটিংস আপডেট
+    document.querySelectorAll('.ppa-val').forEach(el => el.textContent = adminConfig.pointPerAd || 0);
+    document.querySelectorAll('.limit-val').forEach(el => el.textContent = adminConfig.dailyLimit || 0);
+    
+    // ৩. রেফারেল এবং জয়েন বোনাস (এডমিন কন্ট্রোল) - যা প্রোফাইল পেজে দেখাবে
+    const refRewardText = document.querySelector('.ref-reward-text');
+    if(refRewardText) refRewardText.textContent = `${adminConfig.referralReward || 0} Points`;
+
+    const joinBonusText = document.querySelector('.join-bonus-text');
+    if(joinBonusText) joinBonusText.textContent = `${adminConfig.joinBonus || 0} Points`;
+
+    // ৪. আর্ন (Earn) পেজের টেক্সট আপডেট
+    const ppaText = document.querySelector('.ppa-text');
+    if(ppaText) ppaText.textContent = `${adminConfig.pointPerAd || 0} Points`;
+
+    const limitText = document.querySelector('.limit-text');
+    if(limitText) limitText.textContent = adminConfig.dailyLimit || 0;
+
+    const remainVal = document.querySelector('.remain-val');
+    if(remainVal) remainVal.textContent = Math.max(0, (adminConfig.dailyLimit || 0) - (userData.adsToday || 0));
+    
+    // ৫. প্রগ্রেস বার লজিক
+    const prog = adminConfig.dailyLimit > 0 ? ((userData.adsToday || 0) / adminConfig.dailyLimit) * 100 : 0;
+    const earnProg = document.getElementById('earn-prog');
+    if(earnProg) earnProg.style.width = `${prog}%`;
+
+    const earnProgText = document.getElementById('earn-prog-text');
+    if(earnProgText) earnProgText.textContent = `${userData.adsToday || 0} / ${adminConfig.dailyLimit || 0} completed today`;
+        
+        // মারকুই নোটিশ এবং স্পিড আপডেট করার কোড
+    const marqueeEl = document.getElementById('dynamic-marquee');
+    if (marqueeEl) {
+        // ডাটাবেস থেকে টেক্সট সেট করা
+        if (adminConfig.marqueeText) {
+            marqueeEl.innerText = adminConfig.marqueeText;
+        }
+        // ডাটাবেস থেকে স্পিড সেট করা
+        if (adminConfig.marqueeSpeed) {
+            marqueeEl.setAttribute('scrollamount', adminConfig.marqueeSpeed);
+        }
+    }
+        
+    }
+
+    function createCategoryPills(videos) {
+        const categories = new Set();
+        videos.forEach(v => { if(v.category) categories.add(v.category); });
+        const catContainer = document.getElementById('cat-list');
+        catContainer.innerHTML = `<div onclick="filterCat('All')" id="cat-all" class="category-pill active px-5 py-2 rounded-full text-xs font-bold">All Videos</div>`;
+        categories.forEach(cat => {
+            const pill = document.createElement('div'); 
+            pill.className = "category-pill px-5 py-2 rounded-full text-xs font-bold";
+            pill.textContent = cat; 
+            pill.id = `cat-${cat.replace(/\s+/g, '')}`; 
+            pill.onclick = () => filterCat(cat);
+            catContainer.appendChild(pill);
+        });
+    }
+
+    function renderGrid(videos) {
+        document.getElementById('video-grid').innerHTML = videos.map(v => `
+            <div class="card-bg rounded-[2.5rem] overflow-hidden shadow-2xl" onclick="openDetail('${v.id}')">
+                <div class="relative"><img src="${v.thumbnailUrl}" loading="lazy" class="w-full aspect-video object-cover"><div class="duration-tag">${v.category || 'NEW'}</div></div>
+                <div class="p-6"><div class="flex justify-between items-start gap-4"><h3 class="text-sm font-bold leading-relaxed line-clamp-2">${v.title}</h3><div class="bg-white/5 w-10 h-10 rounded-full flex items-center justify-center text-amber-500 border border-white/5"><i class="fas fa-play text-xs"></i></div></div></div>
+            </div>
+        `).join('');
+    }
+
+    window.filterCat = (cat) => {
+        document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+        if(cat === 'All') { document.getElementById('cat-all').classList.add('active'); renderGrid(allVideos); } 
+        else { 
+            const el = document.getElementById(`cat-${cat.replace(/\s+/g, '')}`);
+            if(el) el.classList.add('active'); 
+            renderGrid(allVideos.filter(v => v.category === cat)); 
+        }
+    };
+
+    window.switchTab = (tab) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+        const target = document.getElementById(tab + '-page');
+        if(target) target.classList.remove('hidden');
+        
+        document.getElementById('nav-home').className = tab === 'home' ? "flex flex-col items-center gap-1 amber-text" : "flex flex-col items-center gap-1 text-gray-500";
+        document.getElementById('nav-profile').className = (tab === 'profile' || tab === 'earn') ? "flex flex-col items-center gap-1 amber-text" : "flex flex-col items-center gap-1 text-gray-500";
+        window.scrollTo(0,0);
+    };
+
+    window.goBack = () => switchTab('home');
+    window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('u-reflink').textContent); showToast("Copied!"); };
+    window.shareRef = () => { window.open(`https://t.me/share/url?url=${encodeURIComponent(document.getElementById('u-reflink').textContent)}&text=Watch and Earn!`); };
+    
+    function showToast(m){ 
+        const t = document.getElementById('toast'); 
+        t.textContent = m; 
+        t.classList.replace('opacity-0', 'opacity-100'); 
+        setTimeout(()=>t.classList.replace('opacity-100','opacity-0'), 2500); 
+    }
+
+    init();
+</script>
+</body>
+</html>
